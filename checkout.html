@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HenzShop</title>
+    <link rel="icon" href="logo.jpg">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0-alpha1/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f8f9fa;
+        }
+        .checkout-container {
+            max-width: 900px;
+            margin: 50px auto;
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+            padding: 30px;
+        }
+        .product-item {
+            border-bottom: 1px solid #ddd;
+            padding: 15px 0;
+        }
+        .product-item:last-child {
+            border-bottom: none;
+        }
+        .btn-cancel {
+            color: #dc3545;
+            cursor: pointer;
+        }
+        .btn-logout {
+            border-radius: 50px;
+            padding: 5px 20px;
+            transition: background-color 0.3s ease;
+        }
+        .btn-logout:hover {
+            background-color: #bb2d3b;
+        }
+        /* Footer */
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<!-- Navbar -->
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+    <div class="container">
+        <a class="navbar-brand" href="#">
+            <img src="logo.jpg" alt="HenzShop Logo" style="width: 40px; height: 40px;"> <font face="Cooper Std Black">HenzShop</font>
+        </a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto">
+                <li class="nav-item">
+                    <a class="nav-link" href="beranda.html">Beranda</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="checkout.html">Keranjang</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="kontak.html">Kontak</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link active" href="profile.html">Profil</a>
+                </li>
+                <li class="nav-item">
+                    <button id="logoutButton" class="btn btn-danger btn-logout ms-3">Logout</button>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<div class="checkout-container">
+    <h2 class="text-center mb-4">Checkout</h2>
+
+    <div id="cartItems" class="mb-4">
+        <!-- Product items will be rendered here dynamically -->
+    </div>
+
+    <div class="mb-4">
+        <h4>Total: <span id="totalPrice">Rp 0</span></h4>
+    </div>
+
+    <form id="checkoutForm">
+        <h5>Informasi Pembeli</h5>
+        <div class="mb-3">
+            <label for="name" class="form-label">Nama Lengkap</label>
+            <input type="text" class="form-control" id="name" required>
+        </div>
+        <div class="mb-3">
+            <label for="address" class="form-label">Alamat</label>
+            <textarea class="form-control" id="address" rows="3" required></textarea>
+        </div>
+        <div class="mb-3">
+            <label for="phone" class="form-label">Nomor Telepon</label>
+            <input type="tel" class="form-control" id="phone" required>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Lanjutkan Pembayaran</button>
+    </form>
+</div>
+
+<!-- Footer -->
+<footer class="footer">
+    Copyright&copy; 2025 HenzShop - All right reserved.
+</footer>
+
+<script>
+    // Load cart items from localStorage
+    const cart = JSON.parse(localStorage.getItem('cart')) || [];
+    const cartItemsContainer = document.getElementById('cartItems');
+    const totalPriceElement = document.getElementById('totalPrice');
+
+    function renderCart() {
+        cartItemsContainer.innerHTML = '';
+        let totalPrice = 0;
+
+        if (cart.length === 0) {
+            cartItemsContainer.innerHTML = '<p class="text-center">Keranjang Anda kosong.</p>';
+            return;
+        }
+
+        cart.forEach((item, index) => {
+            const productDiv = document.createElement('div');
+            productDiv.className = 'product-item d-flex justify-content-between align-items-center';
+
+            productDiv.innerHTML = `
+                <div>
+                    <h6>${item.name}</h6>
+                    <p class="mb-0">Rp ${parseInt(item.price).toLocaleString()}</p>
+                </div>
+                <span class="btn-cancel" data-index="${index}">Hapus</span>
+            `;
+
+            cartItemsContainer.appendChild(productDiv);
+            totalPrice += parseInt(item.price);
+        });
+
+        totalPriceElement.textContent = `Rp ${totalPrice.toLocaleString()}`;
+    }
+
+    // Handle remove item
+    cartItemsContainer.addEventListener('click', function (e) {
+        if (e.target.classList.contains('btn-cancel')) {
+            const index = e.target.getAttribute('data-index');
+            cart.splice(index, 1);
+            localStorage.setItem('cart', JSON.stringify(cart));
+            renderCart();
+        }
+    });
+
+    // Handle checkout form submission
+    document.getElementById('checkoutForm').addEventListener('submit', function (event) {
+        event.preventDefault();
+
+        const name = document.getElementById('name').value;
+        const address = document.getElementById('address').value;
+        const phone = document.getElementById('phone').value;
+
+        if (!cart.length) {
+            alert('Keranjang Anda kosong. Silakan tambahkan produk terlebih dahulu.');
+            return;
+        }
+
+        const order = {
+            name,
+            address,
+            phone,
+            products: cart,
+            total: cart.reduce((total, item) => total + parseInt(item.price), 0),
+        };
+
+        const orders = JSON.parse(localStorage.getItem('orders')) || [];
+        orders.push(order);
+        localStorage.setItem('orders', JSON.stringify(orders));
+        localStorage.removeItem('cart');
+
+        alert('Pesanan Anda berhasil diproses!');
+        window.location.href = 'beranda.html';
+    });
+
+    // Initial render
+    renderCart();
+
+    // Logout
+    document.getElementById('logoutButton').addEventListener('click', () => {
+            localStorage.removeItem('currentUser');
+            alert('Anda telah logout.');
+            window.location.href = 'login.html';
+        });
+</script>
+
+</body>
+</html>

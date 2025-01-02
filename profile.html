@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HenzShop</title>
+    <link rel="icon" href="logo.jpg">
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        /* Header Profil */
+        .profile-header {
+            background: linear-gradient(135deg, #6c757d, #343a40);
+            color: white;
+            padding: 3rem 0;
+            text-align: center;
+        }
+
+        .profile-header img {
+            width: 150px;
+            height: 150px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 5px solid white;
+            margin-bottom: 1rem;
+        }
+
+        /* Kartu */
+        .card-custom {
+            border: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+
+        .card-custom:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 16px rgba(0, 0, 0, 0.2);
+        }
+
+        /* Gaya Form */
+        .form-control,
+        .btn {
+            border-radius: 20px;
+        }
+
+        /* Footer */
+        .footer {
+            background-color: #343a40;
+            color: white;
+            padding: 1rem 0;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="#">
+                <img src="logo.jpg" alt="HenzShop Logo" style="width: 40px; height: 40px;"> <font face="Cooper Std Black">HenzShop</font>
+            </a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="beranda.html">Beranda</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="checkout.html">Keranjang</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="kontak.html">Kontak</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active" href="profile.html">Profil</a>
+                    </li>
+                    <li class="nav-item">
+                        <button id="logoutButton" class="btn btn-danger ms-3">Logout</button>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Profil Header -->
+    <div class="profile-header">
+        <img id="profileImg" src="default_pp.jpeg" alt="Foto Profil">
+        <h2 id="usernameDisplay" class="mt-3"></h2>
+        <p><span id="memberSince"></span></p>
+    </div>
+
+    <!-- Konten Profil -->
+    <div class="container my-5">
+        <div class="row">
+            <!-- Ganti Foto Profil -->
+            <div class="col-md-4">
+                <div class="card card-custom text-center p-4">
+                    <h5>Ganti Foto Profil</h5>
+                    <form id="profileForm">
+                        <input type="file" id="profileImageInput" class="form-control mb-3" accept="image/*">
+                        <button type="submit" class="btn btn-primary w-100">Simpan Foto</button>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Edit Informasi -->
+            <div class="col-md-8">
+                <div class="card card-custom p-4">
+                    <h5>Edit Informasi Pengguna</h5>
+                    <form id="userInfoForm">
+                        <div class="mb-3">
+                            <label for="usernameInput" class="form-label">Nama Pengguna</label>
+                            <input type="text" id="usernameInput" class="form-control" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="emailInput" class="form-label">Email</label>
+                            <input type="email" id="emailInput" class="form-control" required>
+                        </div>
+                        <button type="submit" class="btn btn-success w-100">Simpan Perubahan</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Footer -->
+    <footer class="footer">
+        Copyright&copy; 2025 HenzShop - All right reserved.
+    </footer>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Ambil data pengguna
+        const currentUser = JSON.parse(localStorage.getItem('currentUser'));
+        const profileImg = document.getElementById('profileImg');
+        const usernameDisplay = document.getElementById('usernameDisplay');
+        const memberSince = document.getElementById('memberSince');
+        const usernameInput = document.getElementById('usernameInput');
+        const emailInput = document.getElementById('emailInput');
+
+        if (currentUser) {
+            usernameDisplay.textContent = currentUser.username;
+            usernameInput.value = currentUser.username;
+            emailInput.value = currentUser.email || '';
+            memberSince.textContent = currentUser.memberSince || 'Users';
+
+            const storedImage = localStorage.getItem('profileImage');
+            if (storedImage) profileImg.src = storedImage;
+        } else {
+            alert('Silakan login terlebih dahulu!');
+            window.location.href = 'login.html';
+        }
+
+        // Update foto profil
+        document.getElementById('profileForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const file = document.getElementById('profileImageInput').files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = () => {
+                    const newImage = reader.result;
+                    profileImg.src = newImage;
+                    localStorage.setItem('profileImage', newImage);
+                    alert('Foto profil berhasil diperbarui!');
+                };
+                reader.readAsDataURL(file);
+            } else {
+                alert('Pilih gambar terlebih dahulu.');
+            }
+        });
+
+        // Update informasi pengguna
+        document.getElementById('userInfoForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const updatedUser = {
+                ...currentUser,
+                username: usernameInput.value,
+                email: emailInput.value,
+            };
+            localStorage.setItem('currentUser', JSON.stringify(updatedUser));
+            alert('Informasi berhasil diperbarui!');
+        });
+
+        // Logout
+        document.getElementById('logoutButton').addEventListener('click', () => {
+            localStorage.removeItem('currentUser');
+            alert('Anda telah logout.');
+            window.location.href = 'login.html';
+        });
+    </script>
+</body>
+</html>

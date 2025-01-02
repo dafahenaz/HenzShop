@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="icon" href="logo.jpg">
+    <title>HenzShop Admin Panel</title>
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        body {
+            background-color: #f4f6f9;
+            color: #333;
+        }
+        .container {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-top: 50px;
+        }
+        .navbar {
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+        .table thead {
+            background-color: #343a40;
+            color: #fff;
+        }
+        .btn-danger {
+            background-color: #dc3545;
+            border-color: #dc3545;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+            border-color: #bd2130;
+        }
+        .btn-primary {
+            background-color: #007bff;
+            border-color: #007bff;
+        }
+        .btn-primary:hover {
+            background-color: #0056b3;
+            border-color: #004085;
+        }
+        .card {
+            border: 1px solid #ddd;
+            margin-bottom: 20px;
+        }
+        .card-header {
+            background-color: #f8f9fa;
+            font-size: 1.25rem;
+            font-weight: bold;
+        }
+        .card-body {
+            background-color: #fafafa;
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="#">Admin Panel</a>
+            <button class="btn btn-danger" id="logoutAdmin">Logout</button>
+        </div>
+    </nav>
+
+    <div class="container">
+        <div class="card">
+            <div class="card-header">
+                Daftar Pengguna
+            </div>
+            <div class="card-body">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Username</th>
+                            <th>Email</th>
+                            <th>Password</th>
+                            <th>Opsi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="usersTable">
+                        <!-- Data pengguna akan ditambahkan secara otomatis -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <div class="card mt-5">
+            <div class="card-header">
+                Daftar Pesanan
+            </div>
+            <div class="card-body">
+                <table class="table table-striped table-bordered">
+                    <thead>
+                        <tr>
+                            <th>No</th>
+                            <th>Nama Pembeli</th>
+                            <th>Alamat</th>
+                            <th>Nomor Telepon</th>
+                            <th>Total</th>
+                            <th>Produk</th>
+                            <th>Opsi</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ordersTable">
+                        <!-- Data pesanan akan ditambahkan secara otomatis -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Ambil data pengguna dan pesanan dari LocalStorage
+        const users = JSON.parse(localStorage.getItem('users')) || [];
+        const orders = JSON.parse(localStorage.getItem('orders')) || [];
+
+        const usersTable = document.getElementById('usersTable');
+        const ordersTable = document.getElementById('ordersTable');
+
+        // Fungsi untuk merender data pengguna ke tabel
+        function renderUsersTable() {
+            usersTable.innerHTML = ''; // Bersihkan tabel
+            users.forEach((user, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${user.username}</td>
+                    <td>${user.email}</td>
+                    <td>${user.password}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm deleteUserBtn" data-index="${index}">Hapus</button>
+                    </td>
+                `;
+                usersTable.appendChild(row);
+            });
+
+            // Tambahkan event listener untuk tombol hapus
+            document.querySelectorAll('.deleteUserBtn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const index = this.getAttribute('data-index');
+                    deleteUser(index);
+                });
+            });
+        }
+
+        // Fungsi untuk menghapus pengguna
+        function deleteUser(index) {
+            if (confirm('Anda yakin ingin menghapus pengguna ini?')) {
+                users.splice(index, 1); // Hapus pengguna dari array
+                localStorage.setItem('users', JSON.stringify(users)); // Simpan perubahan ke LocalStorage
+                renderUsersTable(); // Render ulang tabel
+                alert('Pengguna berhasil dihapus.');
+            }
+        }
+
+        // Fungsi untuk merender data pesanan ke tabel
+        function renderOrdersTable() {
+            ordersTable.innerHTML = ''; // Bersihkan tabel
+            orders.forEach((order, index) => {
+                const row = document.createElement('tr');
+                const productList = order.products.map(product => `${product.name} (Rp ${parseInt(product.price).toLocaleString()})`).join(', ');
+
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${order.name}</td>
+                    <td>${order.address}</td>
+                    <td>${order.phone}</td>
+                    <td>Rp ${order.total.toLocaleString()}</td>
+                    <td>${productList}</td>
+                    <td>
+                        <button class="btn btn-danger btn-sm deleteOrderBtn" data-index="${index}">Hapus</button>
+                    </td>
+                `;
+                ordersTable.appendChild(row);
+            });
+
+            // Tambahkan event listener untuk tombol hapus pesanan
+            document.querySelectorAll('.deleteOrderBtn').forEach(button => {
+                button.addEventListener('click', function () {
+                    const index = this.getAttribute('data-index');
+                    deleteOrder(index);
+                });
+            });
+        }
+
+        // Fungsi untuk menghapus pesanan
+        function deleteOrder(index) {
+            if (confirm('Anda yakin ingin menghapus pesanan ini?')) {
+                orders.splice(index, 1); // Hapus pesanan dari array
+                localStorage.setItem('orders', JSON.stringify(orders)); // Simpan perubahan ke LocalStorage
+                renderOrdersTable(); // Render ulang tabel
+                alert('Pesanan berhasil dihapus.');
+            }
+        }
+
+        // Render tabel pengguna dan pesanan saat halaman dimuat
+        renderUsersTable();
+        renderOrdersTable();
+
+        // Tombol logout admin
+        document.getElementById('logoutAdmin').addEventListener('click', () => {
+            alert('Anda telah logout dari admin panel.');
+            window.location.href = 'login.html'; // Redirect ke halaman login
+        });
+    </script>
+</body>
+</html>
